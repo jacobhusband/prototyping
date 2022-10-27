@@ -15,13 +15,43 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./src/map.jsx");
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 
 class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
+  constructor(props) {
+    super(props);
+    this.state = {
+      lat: null,
+      lng: null,
+      showingMap: false,
+      atCurrentLocation: false
+    };
+    this.setCurrentLocation = this.setCurrentLocation.bind(this);
+    this.handleShowMapClick = this.handleShowMapClick.bind(this);
+  }
+  setCurrentLocation(event) {
+    window.navigator.geolocation.getCurrentPosition(position => {
+      this.map.setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      });
+    });
+  }
+  handleShowMapClick(event) {
+    this.setState({
+      showingMap: true
+    });
+  }
   render() {
+    const button = this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: this.setCurrentLocation
+    }, "Set Current Location");
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       id: "map"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_map__WEBPACK_IMPORTED_MODULE_1__["default"], null)));
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_map__WEBPACK_IMPORTED_MODULE_1__["default"], _extends({}, this.state, {
+      handleShowMapClick: this.handleShowMapClick
+    }))), button);
   }
 }
 
@@ -48,7 +78,9 @@ class Map extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     };
   }
   render() {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Open Map");
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: this.props.handleShowMapClick
+    }, "Open Map");
   }
 }
 

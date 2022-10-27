@@ -10,7 +10,7 @@ export default class Map extends React.Component{
 
   render() {
     return (
-      <button>Open Map</button>
+      <button onClick={this.props.handleShowMapClick}>Open Map</button>
     )
   }
 }
