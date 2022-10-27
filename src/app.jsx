@@ -5,22 +5,19 @@ export default class App extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      lat: null,
-      lng: null,
       showingMap: false,
-      atCurrentLocation: false
+      atCurrentLocation: false,
+      map: null
     }
-    this.setCurrentLocation = this.setCurrentLocation.bind(this)
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
+    this.handleMapState = this.handleMapState.bind(this)
+    this.setCurrentLocation = this.setCurrentLocation.bind(this)
   }
 
-  setCurrentLocation(event) {
-    window.navigator.geolocation.getCurrentPosition((position) => {
-      this.map.setCenter({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-    });
+  handleMapState(map) {
+    this.setState({
+      map: map
+    })
   }
 
   handleShowMapClick(event) {
@@ -29,13 +26,22 @@ export default class App extends React.Component {
     })
   }
 
+  setCurrentLocation(event) {
+    window.navigator.geolocation.getCurrentPosition((position) => {
+      this.state.map.setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      });
+    });
+  }
+
   render() {
     const button = (this.state.showingMap) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
 
     return(
       <div>
         <h3>My Google Maps Demo</h3>
-        <div id="map">{<Map {...this.state} handleShowMapClick={this.handleShowMapClick}/>}</div>
+        <div id="map">{<Map {...this.state} handleShowMapClick={this.handleShowMapClick} handleMapState={this.handleMapState}/>}</div>
         {button}
       </div>
     )

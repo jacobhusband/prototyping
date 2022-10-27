@@ -4,12 +4,10 @@ export default class Map extends React.Component{
   constructor(props) {
     super(props)
     this.showMap = this.showMap.bind(this)
-    this.map = null;
   }
 
   showMap(event) {
-    console.log(this.props)
-    this.map = new google.maps.Map(document.getElementById("map"), {
+    const map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 33.634929, lng: -117.7405074 },
       zoom: 18,
       minZoom: 15,
@@ -35,12 +33,13 @@ export default class Map extends React.Component{
         zIndex: 1,
       },
     });
-    drawingManager.setMap(this.map);
+    drawingManager.setMap(map);
+    this.props.handleMapState(map);
   }
 
   render() {
     return (
-      <button onClick={(event) => {this.props.handleShowMapClick; this.showMap}}>Open Map</button>
+      <button onClick={(event) => {this.props.handleShowMapClick(event); this.showMap(event)}}>Open Map</button>
     )
   }
 }
