@@ -14,9 +14,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./map */ "./src/map.jsx");
-function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
 
 class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
   constructor(props) {
@@ -24,65 +21,16 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     this.state = {
       showingMap: false,
       atCurrentLocation: false,
-      map: null
+      coordinates: [],
+      distance: 0
     };
     this.handleShowMapClick = this.handleShowMapClick.bind(this);
-    this.handleMapState = this.handleMapState.bind(this);
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
-  }
-  handleMapState(map) {
-    this.setState({
-      map: map
-    });
-  }
-  handleShowMapClick(event) {
-    this.setState({
-      showingMap: true
-    });
-  }
-  setCurrentLocation(event) {
-    window.navigator.geolocation.getCurrentPosition(position => {
-      this.state.map.setCenter({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      });
-    });
-  }
-  render() {
-    const button = this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-      onClick: this.setCurrentLocation
-    }, "Set Current Location");
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-      id: "map"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_map__WEBPACK_IMPORTED_MODULE_1__["default"], _extends({}, this.state, {
-      handleShowMapClick: this.handleShowMapClick,
-      handleMapState: this.handleMapState
-    }))), button);
-  }
-}
-
-/***/ }),
-
-/***/ "./src/map.jsx":
-/*!*********************!*\
-  !*** ./src/map.jsx ***!
-  \*********************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ Map)
-/* harmony export */ });
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-
-class Map extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
-  constructor(props) {
-    super(props);
+    this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
     this.showMap = this.showMap.bind(this);
   }
   showMap(event) {
-    const map = new google.maps.Map(document.getElementById("map"), {
+    this.map = new google.maps.Map(this.mapDivRef.current, {
       center: {
         lat: 33.634929,
         lng: -117.7405074
@@ -92,7 +40,7 @@ class Map extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       maxZoom: 21
     });
     const drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.MARKER,
+      drawingMode: null,
       drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_CENTER,
@@ -111,16 +59,71 @@ class Map extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         zIndex: 1
       }
     });
-    drawingManager.setMap(map);
-    this.props.handleMapState(map);
+    drawingManager.setMap(this.map);
+    google.maps.event.addListener(drawingManager, "overlaycomplete", polygon => {
+      const arr = polygon.overlay.getPath().getArray();
+      const newCoords = [];
+      const newDistances = [];
+      arr.map(obj => {
+        newCoords.push({
+          lat: obj.lat(),
+          lng: obj.lng()
+        });
+      });
+      this.setState({
+        coordinates: newCoords
+      }, () => {
+        console.log('Coordinates of polygon:', this.state.coordinates);
+      });
+      for (var i = 1; i < newCoords.length; i++) {
+        newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
+      }
+      this.setState({
+        distance: newDistances.reduce((x, y) => x + y)
+      }, () => {
+        console.log('Distance in miles: ', this.state.distance);
+      });
+    });
+  }
+  handleShowMapClick(event) {
+    this.setState({
+      showingMap: true
+    });
+  }
+  findDistance(lat1, lat2, lng1, lng2) {
+    lng1 = lng1 * Math.PI / 180;
+    lng2 = lng2 * Math.PI / 180;
+    lat1 = lat1 * Math.PI / 180;
+    lat2 = lat2 * Math.PI / 180;
+    let dlng = lng2 - lng1;
+    let dlat = lat2 - lat1;
+    let a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlng / 2), 2);
+    let c = 2 * Math.asin(Math.sqrt(a));
+    let r = 6371;
+    return c * r;
+  }
+  setCurrentLocation(event) {
+    window.navigator.geolocation.getCurrentPosition(position => {
+      this.state.map.setCenter({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      });
+    });
   }
   render() {
-    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    const currentLocationButton = this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: this.setCurrentLocation
+    }, "Set Current Location");
+    const openMapButton = !this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: event => {
-        this.props.handleShowMapClick(event);
+        this.handleShowMapClick(event);
         this.showMap(event);
       }
     }, "Open Map");
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "map",
+      ref: this.mapDivRef
+    }), currentLocationButton);
   }
 }
 
