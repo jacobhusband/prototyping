@@ -9,7 +9,8 @@ body {
 .map {
   height: 400px;
   width: 600px;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
+  border: 1px solid black;
 }
 
 .full-screen {
@@ -57,8 +58,16 @@ button,
   background-color: rgb(132, 255, 132);
 }
 
+.modal .buttons button:first-child:hover {
+  background-color: rgb(206, 255, 206);
+}
+
 .modal .buttons button:last-child {
   background-color: rgb(241, 167, 167);
+}
+
+.modal .buttons button:last-child:hover {
+  background-color: rgb(255, 219, 219);
 }
 
 .flex-col {

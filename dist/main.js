@@ -23,10 +23,12 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       atCurrentLocation: false,
       coordinates: [],
       distance: 0,
-      pathCompleted: false
+      pathCompleted: false,
+      showEditModal: false
     };
     this.handleShowMapClick = this.handleShowMapClick.bind(this);
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
+    this.handlePathCompleted = this.handlePathCompleted.bind(this);
     this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
     this.showMap = this.showMap.bind(this);
   }
@@ -78,9 +80,23 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       this.setState({
         coordinates: newCoords,
         distance: newDistances.reduce((x, y) => x + y),
-        pathCompleted: true
+        pathCompleted: true,
+        showEditModal: true
       });
     });
+  }
+  handlePathCompleted(event) {
+    if (event.target.name === 'yes') {
+      this.setState({
+        pathCompleted: true,
+        showEditModal: false
+      });
+    } else {
+      this.setState({
+        pathCompleted: false,
+        showEditModal: false
+      });
+    }
   }
   handleShowMapClick(event) {
     this.setState({
@@ -116,24 +132,31 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         this.handleShowMapClick(event);
         this.showMap(event);
       }
-    }, "Open Map");
+    }, "Show Map");
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
     }), currentLocationButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
-      finished: this.state.pathCompleted
+      modal: this.state.showEditModal,
+      handlePathCompleted: this.handlePathCompleted
     }));
   }
 }
 function FinishedModal(props) {
-  const modalClass = props.finished ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background';
+  const modalClass = props.modal ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background';
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: modalClass
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "modal flex-centered flex-col"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "Do you need to edit?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "Does the path look okay?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "buttons"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Yes"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "No"))));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    name: "yes",
+    onClick: props.handlePathCompleted
+  }, "Yes"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    name: "no",
+    onClick: props.handlePathCompleted
+  }, "No"))));
 }
 
 /***/ }),

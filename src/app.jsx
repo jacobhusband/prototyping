@@ -8,10 +8,12 @@ export default class App extends React.Component {
       atCurrentLocation: false,
       coordinates: [],
       distance: 0,
-      pathCompleted: false
+      pathCompleted: false,
+      showEditModal: false
     }
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
     this.setCurrentLocation = this.setCurrentLocation.bind(this)
+    this.handlePathCompleted = this.handlePathCompleted.bind(this)
     this.mapDivRef = React.createRef()
     this.showMap = this.showMap.bind(this);
   }
@@ -61,9 +63,20 @@ export default class App extends React.Component {
       this.setState({
         coordinates: newCoords,
         distance: newDistances.reduce((x,y) => x + y),
-        pathCompleted: true
+        pathCompleted: true,
+        showEditModal: true
       })
     });
+  }
+
+  handlePathCompleted(event) {
+    if (event.target.name === 'yes') {
+      this.setState({ pathCompleted: true,
+                      showEditModal: false })
+    } else {
+      this.setState({ pathCompleted: false,
+                      showEditModal: false })
+    }
   }
 
   handleShowMapClick(event) {
@@ -108,7 +121,7 @@ export default class App extends React.Component {
             this.showMap(event);
           }}
         >
-          Open Map
+          Show Map
         </button>
 
     return(
@@ -117,23 +130,24 @@ export default class App extends React.Component {
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
         {currentLocationButton}
-        {<FinishedModal finished={this.state.pathCompleted}/>}
+        {<FinishedModal modal={this.state.showEditModal} handlePathCompleted={this.handlePathCompleted}/>}
       </div>
     )
   }
 }
 
 function FinishedModal(props) {
-  const modalClass = (props.finished) ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background'
+
+  const modalClass = (props.modal) ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background'
 
   return (
     <div className={modalClass}>
       <div className='modal flex-centered flex-col'>
-        <h3>Do you need to edit?</h3>
-        <form className='buttons'>
-          <button>Yes</button>
-          <button>No</button>
-        </form>
+        <h3>Does the path look okay?</h3>
+        <div className='buttons'>
+          <button name='yes' onClick={props.handlePathCompleted}>Yes</button>
+          <button name='no' onClick={props.handlePathCompleted}>No</button>
+        </div>
       </div>
     </div>
   )
