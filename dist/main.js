@@ -39,7 +39,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       minZoom: 15,
       maxZoom: 21
     });
-    const drawingManager = new google.maps.drawing.DrawingManager({
+    this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: null,
       drawingControl: true,
       drawingControlOptions: {
@@ -47,7 +47,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
       },
       polylineOptions: {
-        editable: true,
+        editable: false,
         clickable: true
       },
       circleOptions: {
@@ -59,8 +59,9 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         zIndex: 1
       }
     });
-    drawingManager.setMap(this.map);
-    google.maps.event.addListener(drawingManager, "overlaycomplete", polygon => {
+    this.drawingManager.setMap(this.map);
+    google.maps.event.addListener(this.drawingManager, "overlaycomplete", polygon => {
+      this.drawingManager.setMap(null);
       const arr = polygon.overlay.getPath().getArray();
       const newCoords = [];
       const newDistances = [];
@@ -104,7 +105,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
   }
   setCurrentLocation(event) {
     window.navigator.geolocation.getCurrentPosition(position => {
-      this.state.map.setCenter({
+      this.map.setCenter({
         lat: position.coords.latitude,
         lng: position.coords.longitude
       });
