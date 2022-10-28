@@ -7,7 +7,8 @@ export default class App extends React.Component {
       showingMap: false,
       atCurrentLocation: false,
       coordinates: [],
-      distance: 0
+      distance: 0,
+      pathCompleted: false
     }
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
     this.setCurrentLocation = this.setCurrentLocation.bind(this)
@@ -54,18 +55,13 @@ export default class App extends React.Component {
           lng: obj.lng()
         })
       });
-      this.setState({
-        coordinates: newCoords
-      }, () => {
-        console.log('Coordinates of polygon:', this.state.coordinates)
-      })
       for (var i = 1; i < newCoords.length; i++) {
         newDistances.push(this.findDistance(newCoords[i-1].lat, newCoords[i].lat, newCoords[i-1].lng, newCoords[i].lng));
       }
       this.setState({
-        distance: newDistances.reduce((x,y) => x + y)
-      }, () => {
-        console.log('Distance in miles: ', this.state.distance)
+        coordinates: newCoords,
+        distance: newDistances.reduce((x,y) => x + y),
+        pathCompleted: true
       })
     });
   }
@@ -121,7 +117,24 @@ export default class App extends React.Component {
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
         {currentLocationButton}
+        {<FinishedModal finished={this.state.pathCompleted}/>}
       </div>
     )
   }
+}
+
+function FinishedModal(props) {
+  const modalClass = (props.finished) ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background'
+
+  return (
+    <div className={modalClass}>
+      <div className='modal flex-centered flex-col'>
+        <h3>Do you need to edit?</h3>
+        <form className='buttons'>
+          <button>Yes</button>
+          <button>No</button>
+        </form>
+      </div>
+    </div>
+  )
 }

@@ -22,7 +22,8 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       showingMap: false,
       atCurrentLocation: false,
       coordinates: [],
-      distance: 0
+      distance: 0,
+      pathCompleted: false
     };
     this.handleShowMapClick = this.handleShowMapClick.bind(this);
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
@@ -71,18 +72,13 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
           lng: obj.lng()
         });
       });
-      this.setState({
-        coordinates: newCoords
-      }, () => {
-        console.log('Coordinates of polygon:', this.state.coordinates);
-      });
       for (var i = 1; i < newCoords.length; i++) {
         newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
       }
       this.setState({
-        distance: newDistances.reduce((x, y) => x + y)
-      }, () => {
-        console.log('Distance in miles: ', this.state.distance);
+        coordinates: newCoords,
+        distance: newDistances.reduce((x, y) => x + y),
+        pathCompleted: true
       });
     });
   }
@@ -124,8 +120,20 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
-    }), currentLocationButton);
+    }), currentLocationButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
+      finished: this.state.pathCompleted
+    }));
   }
+}
+function FinishedModal(props) {
+  const modalClass = props.finished ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background';
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: modalClass
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "modal flex-centered flex-col"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "Do you need to edit?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
+    className: "buttons"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Yes"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "No"))));
 }
 
 /***/ }),

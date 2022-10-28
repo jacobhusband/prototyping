@@ -1,5 +1,79 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
 .map {
   height: 400px;
   width: 600px;
   margin-bottom: 1rem;
+}
+
+.full-screen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.flex-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+h3,
+button,
+.modal {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.modal {
+  background-color: rgb(241, 241, 241);
+  color:rgb(32, 32, 32);
+  border: 1px solid black;
+}
+
+.modal-background {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.modal h3 {
+  padding: 1rem;
+}
+
+.modal .buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal .buttons button:first-child{
+  background-color: rgb(132, 255, 132);
+}
+
+.modal .buttons button:last-child {
+  background-color: rgb(241, 167, 167);
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+button {
+  font-weight: 500;
+  border: 1px solid black;
+}
+
+button:hover {
+  background-color: rgb(216, 216, 216);
+}
+
+.hidden {
+  display: none;
 }
