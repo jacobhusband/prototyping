@@ -14,8 +14,8 @@ export default class App extends React.Component {
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
     this.setCurrentLocation = this.setCurrentLocation.bind(this)
     this.handlePathCompleted = this.handlePathCompleted.bind(this)
-    this.mapDivRef = React.createRef()
     this.showMap = this.showMap.bind(this);
+    this.mapDivRef = React.createRef()
   }
 
   showMap(event) {
@@ -26,14 +26,14 @@ export default class App extends React.Component {
       maxZoom: 21,
     });
     this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: null,
+      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
       drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_CENTER,
         drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
       },
       polylineOptions: {
-        editable: false,
+        editable: true,
         clickable: true,
       },
       circleOptions: {
@@ -47,8 +47,13 @@ export default class App extends React.Component {
     });
     this.drawingManager.setMap(this.map);
     google.maps.event.addListener(this.drawingManager, "overlaycomplete", (polygon) => {
-      this.drawingManager.setMap(null)
-      const arr = polygon.overlay.getPath().getArray();
+      this.handlePolygonCalculations(polygon, true)
+    });
+  }
+
+  handlePolygonCalculations(polygon, showEditModal) {
+    this.polygon = polygon;
+    const arr = polygon.overlay.getPath().getArray();
       const newCoords = []
       const newDistances = []
       arr.map((obj) => {
@@ -64,18 +69,25 @@ export default class App extends React.Component {
         coordinates: newCoords,
         distance: newDistances.reduce((x,y) => x + y),
         pathCompleted: true,
-        showEditModal: true
+        showEditModal: showEditModal
       })
-    });
   }
 
   handlePathCompleted(event) {
     if (event.target.name === 'yes') {
       this.setState({ pathCompleted: true,
                       showEditModal: false })
+      this.polygon.overlay.setEditable(false)
+      this.drawingManager.setMap(null)
     } else {
       this.setState({ pathCompleted: false,
-                      showEditModal: false })
+                      showEditModal: false });
+      this.drawingManager.setDrawingMode(null);
+      this.drawingManager.setOptions({
+        drawingControlOptions: {
+        drawingModes: [],
+      }
+      });
     }
   }
 
@@ -113,16 +125,15 @@ export default class App extends React.Component {
   }
 
   render() {
-    const currentLocationButton = (this.state.showingMap) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
+    const currentLocationButton = (this.state.showingMap && !this.polygon) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
 
-    const openMapButton = (!this.state.showingMap) && <button
-          onClick={(event) => {
+    const openMapButton = (!this.state.showingMap) &&
+    <button onClick={(event) => {
             this.handleShowMapClick(event);
             this.showMap(event);
-          }}
-        >
-          Show Map
-        </button>
+          }}> Show Map </button>
+
+    const saveButton = (this.state.showingMap && this.polygon && !this.state.pathCompleted) && <button onClick={(event) => {this.handlePathCompleted(event); this.handlePolygonCalculations(this.polygon, false)}} name="yes" className='save'>Save</button>
 
     return(
       <div>
@@ -130,6 +141,7 @@ export default class App extends React.Component {
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
         {currentLocationButton}
+        {saveButton}
         {<FinishedModal modal={this.state.showEditModal} handlePathCompleted={this.handlePathCompleted}/>}
       </div>
     )

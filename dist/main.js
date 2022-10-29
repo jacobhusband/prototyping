@@ -29,8 +29,8 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     this.handleShowMapClick = this.handleShowMapClick.bind(this);
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
     this.handlePathCompleted = this.handlePathCompleted.bind(this);
-    this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
     this.showMap = this.showMap.bind(this);
+    this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
   }
   showMap(event) {
     this.map = new google.maps.Map(this.mapDivRef.current, {
@@ -43,14 +43,14 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       maxZoom: 21
     });
     this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: null,
+      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
       drawingControl: true,
       drawingControlOptions: {
         position: google.maps.ControlPosition.TOP_CENTER,
         drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
       },
       polylineOptions: {
-        editable: false,
+        editable: true,
         clickable: true
       },
       circleOptions: {
@@ -64,25 +64,28 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     });
     this.drawingManager.setMap(this.map);
     google.maps.event.addListener(this.drawingManager, "overlaycomplete", polygon => {
-      this.drawingManager.setMap(null);
-      const arr = polygon.overlay.getPath().getArray();
-      const newCoords = [];
-      const newDistances = [];
-      arr.map(obj => {
-        newCoords.push({
-          lat: obj.lat(),
-          lng: obj.lng()
-        });
+      this.handlePolygonCalculations(polygon, true);
+    });
+  }
+  handlePolygonCalculations(polygon, showEditModal) {
+    this.polygon = polygon;
+    const arr = polygon.overlay.getPath().getArray();
+    const newCoords = [];
+    const newDistances = [];
+    arr.map(obj => {
+      newCoords.push({
+        lat: obj.lat(),
+        lng: obj.lng()
       });
-      for (var i = 1; i < newCoords.length; i++) {
-        newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
-      }
-      this.setState({
-        coordinates: newCoords,
-        distance: newDistances.reduce((x, y) => x + y),
-        pathCompleted: true,
-        showEditModal: true
-      });
+    });
+    for (var i = 1; i < newCoords.length; i++) {
+      newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
+    }
+    this.setState({
+      coordinates: newCoords,
+      distance: newDistances.reduce((x, y) => x + y),
+      pathCompleted: true,
+      showEditModal: showEditModal
     });
   }
   handlePathCompleted(event) {
@@ -91,10 +94,18 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         pathCompleted: true,
         showEditModal: false
       });
+      this.polygon.overlay.setEditable(false);
+      this.drawingManager.setMap(null);
     } else {
       this.setState({
         pathCompleted: false,
         showEditModal: false
+      });
+      this.drawingManager.setDrawingMode(null);
+      this.drawingManager.setOptions({
+        drawingControlOptions: {
+          drawingModes: []
+        }
       });
     }
   }
@@ -124,7 +135,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     });
   }
   render() {
-    const currentLocationButton = this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    const currentLocationButton = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: this.setCurrentLocation
     }, "Set Current Location");
     const openMapButton = !this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
@@ -132,11 +143,19 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         this.handleShowMapClick(event);
         this.showMap(event);
       }
-    }, "Show Map");
+    }, " Show Map ");
+    const saveButton = this.state.showingMap && this.polygon && !this.state.pathCompleted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: event => {
+        this.handlePathCompleted(event);
+        this.handlePolygonCalculations(this.polygon, false);
+      },
+      name: "yes",
+      className: "save"
+    }, "Save");
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
-    }), currentLocationButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
+    }), currentLocationButton, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
       modal: this.state.showEditModal,
       handlePathCompleted: this.handlePathCompleted
     }));

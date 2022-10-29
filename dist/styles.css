@@ -83,6 +83,14 @@ button:hover {
   background-color: rgb(216, 216, 216);
 }
 
+button.save {
+  background-color: rgb(211, 235, 255);
+}
+
+button.save:hover {
+  background-color: rgb(218, 255, 255);
+}
+
 .hidden {
   display: none;
 }
