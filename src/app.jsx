@@ -9,18 +9,20 @@ export default class App extends React.Component {
       coordinates: [],
       distance: 0,
       pathCompleted: false,
-      showEditModal: false
+      showEditModal: false,
+      mapCenter: { lat: 33.634929, lng: -117.7405074 }
     }
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
     this.setCurrentLocation = this.setCurrentLocation.bind(this)
     this.handlePathCompleted = this.handlePathCompleted.bind(this)
     this.showMap = this.showMap.bind(this);
+    this.handleLocationInputs = this.handleLocationInputs.bind(this)
     this.mapDivRef = React.createRef()
   }
 
   showMap(event) {
     this.map = new google.maps.Map(this.mapDivRef.current, {
-      center: { lat: 33.634929, lng: -117.7405074 },
+      center: this.state.mapCenter,
       zoom: 18,
       minZoom: 15,
       maxZoom: 21,
@@ -121,7 +123,18 @@ export default class App extends React.Component {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       });
+      this.setState({
+        mapCenter: {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      }
+      })
     });
+  }
+
+  handleLocationInputs(event) {
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${event.target.value}&types=park&location=${this.state.mapCenter.lat}%2C${this.state.mapCenter.lng}&radius=500&key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg`
+    fetch(url).then(res => res.json).then(data => console.log(data)).catch(err => console.error(err))
   }
 
   render() {
@@ -129,9 +142,9 @@ export default class App extends React.Component {
 
     const enterLocation = (this.state.showingMap && !this.polygon) &&
     <>
-      <form class='location'>
+      <form className='location'>
         <label htmlFor="location">Enter a location</label>
-        <input type="text" />
+        <input type="text" onChange={this.handleLocationInputs}/>
       </form>
       <p>or</p>
     </>
@@ -152,7 +165,6 @@ export default class App extends React.Component {
         {enterLocation}
         {currentLocationButton}
         {saveButton}
-
         {<FinishedModal modal={this.state.showEditModal} handlePathCompleted={this.handlePathCompleted}/>}
       </div>
     )
