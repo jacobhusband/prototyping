@@ -138,6 +138,13 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     const currentLocationButton = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: this.setCurrentLocation
     }, "Set Current Location");
+    const enterLocation = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
+      class: "location"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
+      htmlFor: "location"
+    }, "Enter a location"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      type: "text"
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "or"));
     const openMapButton = !this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: event => {
         this.handleShowMapClick(event);
@@ -155,7 +162,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
-    }), currentLocationButton, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
+    }), enterLocation, currentLocationButton, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
       modal: this.state.showEditModal,
       handlePathCompleted: this.handlePathCompleted
     }));

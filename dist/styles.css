@@ -30,7 +30,10 @@ body {
 
 h3,
 button,
-.modal {
+.modal,
+label,
+input,
+p {
   font-family: 'Courier New', Courier, monospace;
 }
 
@@ -89,6 +92,27 @@ button.save {
 
 button.save:hover {
   background-color: rgb(218, 255, 255);
+}
+
+form.location label {
+  padding-right: 0.5rem;
+}
+
+form.location label,
+form.location input,
+form.location p,
+button {
+  font-size: 0.9rem;
+}
+
+form.location input {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0;
+  border: 1px solid black;
+}
+
+form.location input:focus {
+  outline: 1px solid blue;
 }
 
 .hidden {

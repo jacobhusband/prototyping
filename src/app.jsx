@@ -127,6 +127,15 @@ export default class App extends React.Component {
   render() {
     const currentLocationButton = (this.state.showingMap && !this.polygon) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
 
+    const enterLocation = (this.state.showingMap && !this.polygon) &&
+    <>
+      <form class='location'>
+        <label htmlFor="location">Enter a location</label>
+        <input type="text" />
+      </form>
+      <p>or</p>
+    </>
+
     const openMapButton = (!this.state.showingMap) &&
     <button onClick={(event) => {
             this.handleShowMapClick(event);
@@ -140,8 +149,10 @@ export default class App extends React.Component {
         <h3>My Google Maps Demo</h3>
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
+        {enterLocation}
         {currentLocationButton}
         {saveButton}
+
         {<FinishedModal modal={this.state.showEditModal} handlePathCompleted={this.handlePathCompleted}/>}
       </div>
     )
