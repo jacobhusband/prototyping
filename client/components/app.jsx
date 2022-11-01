@@ -1,5 +1,15 @@
 import React from 'react'
 
+import { Loader } from "@googlemaps/js-api-loader";
+
+/* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=drawing,places" defer></script>; */
+
+const loader = new Loader({
+  apiKey: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg",
+  version: "weekly",
+  libraries: "drawing,places",
+});
+
 export default class App extends React.Component {
   constructor(props) {
     super(props)
@@ -21,36 +31,39 @@ export default class App extends React.Component {
   }
 
   showMap(event) {
-    this.map = new google.maps.Map(this.mapDivRef.current, {
-      center: this.state.mapCenter,
-      zoom: 18,
-      minZoom: 15,
-      maxZoom: 21,
-    });
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYLINE,
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
-      },
-      polylineOptions: {
-        editable: true,
-        clickable: true,
-      },
-      circleOptions: {
-        fillColor: "#ffff00",
-        fillOpacity: 1,
-        strokeWeight: 5,
-        clickable: false,
-        editable: true,
-        zIndex: 1,
-      },
-    });
-    this.drawingManager.setMap(this.map);
-    google.maps.event.addListener(this.drawingManager, "overlaycomplete", (polygon) => {
-      this.handlePolygonCalculations(polygon, true)
-    });
+    loader.load().then(() => {
+      this.map = new google.maps.Map(this.mapDivRef.current, {
+        center: this.state.mapCenter,
+        zoom: 18,
+        minZoom: 15,
+        maxZoom: 21,
+      });
+      this.drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+        drawingControl: true,
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [google.maps.drawing.OverlayType.POLYLINE],
+        },
+        polylineOptions: {
+          editable: true,
+          clickable: true,
+        },
+        circleOptions: {
+          fillColor: "#ffff00",
+          fillOpacity: 1,
+          strokeWeight: 5,
+          clickable: false,
+          editable: true,
+          zIndex: 1,
+        },
+      });
+      this.drawingManager.setMap(this.map);
+      google.maps.event.addListener(this.drawingManager, "overlaycomplete", (polygon) => {
+        this.handlePolygonCalculations(polygon, true)
+      });
+    })
+
   }
 
   handlePolygonCalculations(polygon, showEditModal) {
