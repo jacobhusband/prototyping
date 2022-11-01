@@ -134,7 +134,7 @@ export default class App extends React.Component {
 
   handleLocationInputs(event) {
     const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${event.target.value}&types=park&location=${this.state.mapCenter.lat}%2C${this.state.mapCenter.lng}&radius=500&key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg`
-    fetch(url).then(res => res.json).then(data => console.log(data)).catch(err => console.error(err))
+    fetch(url).then(res => res.json()).then(data => console.log(data)).catch(err => console.error(err))
   }
 
   render() {
