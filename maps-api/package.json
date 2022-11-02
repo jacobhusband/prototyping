@@ -2,11 +2,12 @@
   "name": "prototyping",
   "version": "1.0.0",
   "description": "A space to tinker with new technologies.",
-  "main": "index.jsx",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "watch": "webpack --watch --stats=minimal --mode=development --devtool=source-map"
+    "watch": "webpack --watch --stats=minimal --mode=development --devtool=source-map",
+    "start": "node server/index.js",
+    "dev": "NODE_ENV=development nodemon server/index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,12 @@
   },
   "homepage": "https://github.com/jacobhusband/prototyping#readme",
   "dependencies": {
+    "@googlemaps/js-api-loader": "^1.14.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "pg": "^8.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

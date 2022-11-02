@@ -2,10 +2,345 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/app.jsx":
-/*!*********************!*\
-  !*** ./src/app.jsx ***!
-  \*********************/
+/***/ "./node_modules/@googlemaps/js-api-loader/dist/index.esm.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/@googlemaps/js-api-loader/dist/index.esm.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "DEFAULT_ID": () => (/* binding */ DEFAULT_ID),
+/* harmony export */   "Loader": () => (/* binding */ Loader),
+/* harmony export */   "LoaderStatus": () => (/* binding */ LoaderStatus)
+/* harmony export */ });
+// do not edit .js files directly - edit src/index.jst
+
+
+
+var fastDeepEqual = function equal(a, b) {
+  if (a === b) return true;
+
+  if (a && b && typeof a == 'object' && typeof b == 'object') {
+    if (a.constructor !== b.constructor) return false;
+
+    var length, i, keys;
+    if (Array.isArray(a)) {
+      length = a.length;
+      if (length != b.length) return false;
+      for (i = length; i-- !== 0;)
+        if (!equal(a[i], b[i])) return false;
+      return true;
+    }
+
+
+
+    if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
+    if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
+    if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
+
+    keys = Object.keys(a);
+    length = keys.length;
+    if (length !== Object.keys(b).length) return false;
+
+    for (i = length; i-- !== 0;)
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+
+    for (i = length; i-- !== 0;) {
+      var key = keys[i];
+
+      if (!equal(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  // true if both NaN, false otherwise
+  return a!==a && b!==b;
+};
+
+/**
+ * Copyright 2019 Google LLC. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at.
+ *
+ *      Http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const DEFAULT_ID = "__googleMapsScriptId";
+/**
+ * The status of the [[Loader]].
+ */
+var LoaderStatus;
+(function (LoaderStatus) {
+    LoaderStatus[LoaderStatus["INITIALIZED"] = 0] = "INITIALIZED";
+    LoaderStatus[LoaderStatus["LOADING"] = 1] = "LOADING";
+    LoaderStatus[LoaderStatus["SUCCESS"] = 2] = "SUCCESS";
+    LoaderStatus[LoaderStatus["FAILURE"] = 3] = "FAILURE";
+})(LoaderStatus || (LoaderStatus = {}));
+/**
+ * [[Loader]] makes it easier to add Google Maps JavaScript API to your application
+ * dynamically using
+ * [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+ * It works by dynamically creating and appending a script node to the the
+ * document head and wrapping the callback function so as to return a promise.
+ *
+ * ```
+ * const loader = new Loader({
+ *   apiKey: "",
+ *   version: "weekly",
+ *   libraries: ["places"]
+ * });
+ *
+ * loader.load().then((google) => {
+ *   const map = new google.maps.Map(...)
+ * })
+ * ```
+ */
+class Loader {
+    /**
+     * Creates an instance of Loader using [[LoaderOptions]]. No defaults are set
+     * using this library, instead the defaults are set by the Google Maps
+     * JavaScript API server.
+     *
+     * ```
+     * const loader = Loader({apiKey, version: 'weekly', libraries: ['places']});
+     * ```
+     */
+    constructor({ apiKey, authReferrerPolicy, channel, client, id = DEFAULT_ID, language, libraries = [], mapIds, nonce, region, retries = 3, url = "https://maps.googleapis.com/maps/api/js", version, }) {
+        this.CALLBACK = "__googleMapsCallback";
+        this.callbacks = [];
+        this.done = false;
+        this.loading = false;
+        this.errors = [];
+        this.apiKey = apiKey;
+        this.authReferrerPolicy = authReferrerPolicy;
+        this.channel = channel;
+        this.client = client;
+        this.id = id || DEFAULT_ID; // Do not allow empty string
+        this.language = language;
+        this.libraries = libraries;
+        this.mapIds = mapIds;
+        this.nonce = nonce;
+        this.region = region;
+        this.retries = retries;
+        this.url = url;
+        this.version = version;
+        if (Loader.instance) {
+            if (!fastDeepEqual(this.options, Loader.instance.options)) {
+                throw new Error(`Loader must not be called again with different options. ${JSON.stringify(this.options)} !== ${JSON.stringify(Loader.instance.options)}`);
+            }
+            return Loader.instance;
+        }
+        Loader.instance = this;
+    }
+    get options() {
+        return {
+            version: this.version,
+            apiKey: this.apiKey,
+            channel: this.channel,
+            client: this.client,
+            id: this.id,
+            libraries: this.libraries,
+            language: this.language,
+            region: this.region,
+            mapIds: this.mapIds,
+            nonce: this.nonce,
+            url: this.url,
+            authReferrerPolicy: this.authReferrerPolicy,
+        };
+    }
+    get status() {
+        if (this.errors.length) {
+            return LoaderStatus.FAILURE;
+        }
+        if (this.done) {
+            return LoaderStatus.SUCCESS;
+        }
+        if (this.loading) {
+            return LoaderStatus.LOADING;
+        }
+        return LoaderStatus.INITIALIZED;
+    }
+    get failed() {
+        return this.done && !this.loading && this.errors.length >= this.retries + 1;
+    }
+    /**
+     * CreateUrl returns the Google Maps JavaScript API script url given the [[LoaderOptions]].
+     *
+     * @ignore
+     */
+    createUrl() {
+        let url = this.url;
+        url += `?callback=${this.CALLBACK}`;
+        if (this.apiKey) {
+            url += `&key=${this.apiKey}`;
+        }
+        if (this.channel) {
+            url += `&channel=${this.channel}`;
+        }
+        if (this.client) {
+            url += `&client=${this.client}`;
+        }
+        if (this.libraries.length > 0) {
+            url += `&libraries=${this.libraries.join(",")}`;
+        }
+        if (this.language) {
+            url += `&language=${this.language}`;
+        }
+        if (this.region) {
+            url += `&region=${this.region}`;
+        }
+        if (this.version) {
+            url += `&v=${this.version}`;
+        }
+        if (this.mapIds) {
+            url += `&map_ids=${this.mapIds.join(",")}`;
+        }
+        if (this.authReferrerPolicy) {
+            url += `&auth_referrer_policy=${this.authReferrerPolicy}`;
+        }
+        return url;
+    }
+    deleteScript() {
+        const script = document.getElementById(this.id);
+        if (script) {
+            script.remove();
+        }
+    }
+    /**
+     * Load the Google Maps JavaScript API script and return a Promise.
+     */
+    load() {
+        return this.loadPromise();
+    }
+    /**
+     * Load the Google Maps JavaScript API script and return a Promise.
+     *
+     * @ignore
+     */
+    loadPromise() {
+        return new Promise((resolve, reject) => {
+            this.loadCallback((err) => {
+                if (!err) {
+                    resolve(window.google);
+                }
+                else {
+                    reject(err.error);
+                }
+            });
+        });
+    }
+    /**
+     * Load the Google Maps JavaScript API script with a callback.
+     */
+    loadCallback(fn) {
+        this.callbacks.push(fn);
+        this.execute();
+    }
+    /**
+     * Set the script on document.
+     */
+    setScript() {
+        if (document.getElementById(this.id)) {
+            // TODO wrap onerror callback for cases where the script was loaded elsewhere
+            this.callback();
+            return;
+        }
+        const url = this.createUrl();
+        const script = document.createElement("script");
+        script.id = this.id;
+        script.type = "text/javascript";
+        script.src = url;
+        script.onerror = this.loadErrorCallback.bind(this);
+        script.defer = true;
+        script.async = true;
+        if (this.nonce) {
+            script.nonce = this.nonce;
+        }
+        document.head.appendChild(script);
+    }
+    /**
+     * Reset the loader state.
+     */
+    reset() {
+        this.deleteScript();
+        this.done = false;
+        this.loading = false;
+        this.errors = [];
+        this.onerrorEvent = null;
+    }
+    resetIfRetryingFailed() {
+        if (this.failed) {
+            this.reset();
+        }
+    }
+    loadErrorCallback(e) {
+        this.errors.push(e);
+        if (this.errors.length <= this.retries) {
+            const delay = this.errors.length * Math.pow(2, this.errors.length);
+            console.log(`Failed to load Google Maps script, retrying in ${delay} ms.`);
+            setTimeout(() => {
+                this.deleteScript();
+                this.setScript();
+            }, delay);
+        }
+        else {
+            this.onerrorEvent = e;
+            this.callback();
+        }
+    }
+    setCallback() {
+        window.__googleMapsCallback = this.callback.bind(this);
+    }
+    callback() {
+        this.done = true;
+        this.loading = false;
+        this.callbacks.forEach((cb) => {
+            cb(this.onerrorEvent);
+        });
+        this.callbacks = [];
+    }
+    execute() {
+        this.resetIfRetryingFailed();
+        if (this.done) {
+            this.callback();
+        }
+        else {
+            // short circuit and warn if google.maps is already loaded
+            if (window.google && window.google.maps && window.google.maps.version) {
+                console.warn("Google Maps already loaded outside @googlemaps/js-api-loader." +
+                    "This may result in undesirable behavior as options and script parameters may not match.");
+                this.callback();
+                return;
+            }
+            if (this.loading) ;
+            else {
+                this.loading = true;
+                this.setCallback();
+                this.setScript();
+            }
+        }
+    }
+}
+
+
+//# sourceMappingURL=index.esm.js.map
+
+
+/***/ }),
+
+/***/ "./client/components/app.jsx":
+/*!***********************************!*\
+  !*** ./client/components/app.jsx ***!
+  \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -14,7 +349,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _googlemaps_js_api_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @googlemaps/js-api-loader */ "./node_modules/@googlemaps/js-api-loader/dist/index.esm.js");
 
+
+const loader = new _googlemaps_js_api_loader__WEBPACK_IMPORTED_MODULE_1__.Loader({
+  apiKey: "AIzaSyBeNi6X_3E2J4ElWyexqXHqL2ASL1xC2k4",
+  version: "weekly",
+  libraries: ["drawing", "places"]
+});
 class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
   constructor(props) {
     super(props);
@@ -22,69 +364,116 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       showingMap: false,
       atCurrentLocation: false,
       coordinates: [],
-      distance: 0
+      distance: 0,
+      pathCompleted: false,
+      showEditModal: false,
+      mapCenter: {
+        lat: 33.634929,
+        lng: -117.7405074
+      }
     };
     this.handleShowMapClick = this.handleShowMapClick.bind(this);
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
-    this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
+    this.handlePathCompleted = this.handlePathCompleted.bind(this);
     this.showMap = this.showMap.bind(this);
+    this.onPlaceChanged = this.onPlaceChanged.bind(this);
+    this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
+    this.autocompleteDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
   }
   showMap(event) {
-    this.map = new google.maps.Map(this.mapDivRef.current, {
-      center: {
-        lat: 33.634929,
-        lng: -117.7405074
-      },
-      zoom: 18,
-      minZoom: 15,
-      maxZoom: 21
+    loader.load().then(() => {
+      this.map = new google.maps.Map(this.mapDivRef.current, {
+        center: this.state.mapCenter,
+        zoom: 18,
+        minZoom: 17,
+        maxZoom: 19
+      });
+      this.drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.POLYLINE,
+        drawingControl: true,
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
+        },
+        polylineOptions: {
+          editable: true,
+          clickable: true
+        },
+        circleOptions: {
+          fillColor: "#ffff00",
+          fillOpacity: 1,
+          strokeWeight: 5,
+          clickable: false,
+          editable: true,
+          zIndex: 1
+        }
+      });
+      this.drawingManager.setMap(this.map);
+      this.autocomplete = new google.maps.places.Autocomplete(this.autocompleteDivRef.current, {
+        types: ['geocode'],
+        componentRestrictions: {
+          'country': ['USA']
+        },
+        fields: ['formatted_address', 'geometry', 'name']
+      });
+      this.autocomplete.addListener('place_changed', this.onPlaceChanged);
+      google.maps.event.addListener(this.drawingManager, "overlaycomplete", polygon => {
+        this.handlePolygonCalculations(polygon, true);
+      });
     });
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: null,
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYLINE]
-      },
-      polylineOptions: {
-        editable: false,
-        clickable: true
-      },
-      circleOptions: {
-        fillColor: "#ffff00",
-        fillOpacity: 1,
-        strokeWeight: 5,
-        clickable: false,
-        editable: true,
-        zIndex: 1
-      }
+  }
+  onPlaceChanged() {
+    const place = this.autocomplete.getPlace();
+    const coords = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    };
+    this.map.setCenter(coords);
+    this.setState({
+      mapCenter: coords
     });
-    this.drawingManager.setMap(this.map);
-    google.maps.event.addListener(this.drawingManager, "overlaycomplete", polygon => {
+  }
+  handlePolygonCalculations(polygon, showEditModal) {
+    this.polygon = polygon;
+    const arr = polygon.overlay.getPath().getArray();
+    const newCoords = [];
+    const newDistances = [];
+    arr.map(obj => {
+      newCoords.push({
+        lat: obj.lat(),
+        lng: obj.lng()
+      });
+    });
+    for (var i = 1; i < newCoords.length; i++) {
+      newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
+    }
+    this.setState({
+      coordinates: newCoords,
+      distance: newDistances.reduce((x, y) => x + y),
+      pathCompleted: true,
+      showEditModal: showEditModal
+    });
+  }
+  handlePathCompleted(event) {
+    if (event.target.name === 'yes') {
+      this.setState({
+        pathCompleted: true,
+        showEditModal: false
+      });
+      this.polygon.overlay.setEditable(false);
       this.drawingManager.setMap(null);
-      const arr = polygon.overlay.getPath().getArray();
-      const newCoords = [];
-      const newDistances = [];
-      arr.map(obj => {
-        newCoords.push({
-          lat: obj.lat(),
-          lng: obj.lng()
-        });
-      });
+    } else {
       this.setState({
-        coordinates: newCoords
-      }, () => {
-        console.log('Coordinates of polygon:', this.state.coordinates);
+        pathCompleted: false,
+        showEditModal: false
       });
-      for (var i = 1; i < newCoords.length; i++) {
-        newDistances.push(this.findDistance(newCoords[i - 1].lat, newCoords[i].lat, newCoords[i - 1].lng, newCoords[i].lng));
-      }
-      this.setState({
-        distance: newDistances.reduce((x, y) => x + y)
-      }, () => {
-        console.log('Distance in miles: ', this.state.distance);
+      this.drawingManager.setDrawingMode(null);
+      this.drawingManager.setOptions({
+        drawingControlOptions: {
+          drawingModes: []
+        }
       });
-    });
+    }
   }
   handleShowMapClick(event) {
     this.setState({
@@ -109,23 +498,64 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       });
+      this.setState({
+        mapCenter: {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        }
+      });
     });
   }
   render() {
-    const currentLocationButton = this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    const currentLocationButton = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: this.setCurrentLocation
     }, "Set Current Location");
+    const enterLocation = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "or"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "location"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      id: "autocomplete",
+      placeholder: "search a location",
+      type: "text",
+      ref: this.autocompleteDivRef
+    })));
     const openMapButton = !this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: event => {
         this.handleShowMapClick(event);
         this.showMap(event);
       }
-    }, "Open Map");
+    }, " Show Map ");
+    const saveButton = this.state.showingMap && this.polygon && !this.state.pathCompleted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: event => {
+        this.handlePathCompleted(event);
+        this.handlePolygonCalculations(this.polygon, false);
+      },
+      name: "yes",
+      className: "save"
+    }, "Save");
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
-    }), currentLocationButton);
+    }), currentLocationButton, enterLocation, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
+      modal: this.state.showEditModal,
+      handlePathCompleted: this.handlePathCompleted
+    }));
   }
+}
+function FinishedModal(props) {
+  const modalClass = props.modal ? 'flex-centered full-screen modal-background' : 'hidden flex-centered full-screen modal-background';
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: modalClass
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "modal flex-centered flex-col"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "Does the path look okay?"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    className: "buttons"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    name: "yes",
+    onClick: props.handlePathCompleted
+  }, "Yes"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    name: "no",
+    onClick: props.handlePathCompleted
+  }, "No"))));
 }
 
 /***/ }),
@@ -33585,19 +34015,19 @@ if (false) {} else {
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-/*!***********************!*\
-  !*** ./src/index.jsx ***!
-  \***********************/
+/*!**************************!*\
+  !*** ./client/index.jsx ***!
+  \**************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
-/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app */ "./src/app.jsx");
+/* harmony import */ var _components_app__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/app */ "./client/components/app.jsx");
 
 
 
 const root = react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot(document.querySelector('#root'));
-root.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_app__WEBPACK_IMPORTED_MODULE_2__["default"], null));
+root.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_app__WEBPACK_IMPORTED_MODULE_2__["default"], null));
 })();
 
 /******/ })()

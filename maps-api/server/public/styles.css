@@ -1,0 +1,112 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.map {
+  height: 400px;
+  width: 600px;
+  margin: 1rem 0;
+  border: 1px solid black;
+}
+
+.full-screen {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.flex-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+h3,
+button,
+.modal,
+label,
+input,
+p {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.modal {
+  background-color: rgb(241, 241, 241);
+  color:rgb(32, 32, 32);
+  border: 1px solid black;
+}
+
+.modal-background {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+.modal h3 {
+  padding: 1rem;
+}
+
+.modal .buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal .buttons button:first-child{
+  background-color: rgb(132, 255, 132);
+}
+
+.modal .buttons button:first-child:hover {
+  background-color: rgb(206, 255, 206);
+}
+
+.modal .buttons button:last-child {
+  background-color: rgb(241, 167, 167);
+}
+
+.modal .buttons button:last-child:hover {
+  background-color: rgb(255, 219, 219);
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+button,
+div.location input {
+  font-weight: 500;
+  border: 1px solid black;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0;
+}
+
+button:hover {
+  background-color: rgb(216, 216, 216);
+}
+
+button.save {
+  background-color: rgb(211, 235, 255);
+}
+
+button.save:hover {
+  background-color: rgb(218, 255, 255);
+}
+
+div.location input,
+div.location p,
+button {
+  font-size: 0.9rem;
+}
+
+div.location input:focus {
+  outline: 1px solid blue;
+}
+
+.hidden {
+  display: none;
+}
