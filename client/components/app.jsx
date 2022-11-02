@@ -1,13 +1,10 @@
 import React from 'react'
-
 import { Loader } from "@googlemaps/js-api-loader";
 
-/* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=drawing,places" defer></script>; */
-
 const loader = new Loader({
-  apiKey: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg",
+  apiKey: "AIzaSyBeNi6X_3E2J4ElWyexqXHqL2ASL1xC2k4",
   version: "weekly",
-  libraries: "drawing,places",
+  libraries: ["drawing","places"],
 });
 
 export default class App extends React.Component {
@@ -26,8 +23,9 @@ export default class App extends React.Component {
     this.setCurrentLocation = this.setCurrentLocation.bind(this)
     this.handlePathCompleted = this.handlePathCompleted.bind(this)
     this.showMap = this.showMap.bind(this);
-    this.handleLocationInputs = this.handleLocationInputs.bind(this)
-    this.mapDivRef = React.createRef()
+    this.onPlaceChanged = this.onPlaceChanged.bind(this);
+    this.mapDivRef = React.createRef();
+    this.autocompleteDivRef = React.createRef();
   }
 
   showMap(event) {
@@ -35,8 +33,8 @@ export default class App extends React.Component {
       this.map = new google.maps.Map(this.mapDivRef.current, {
         center: this.state.mapCenter,
         zoom: 18,
-        minZoom: 15,
-        maxZoom: 21,
+        minZoom: 17,
+        maxZoom: 19,
       });
       this.drawingManager = new google.maps.drawing.DrawingManager({
         drawingMode: google.maps.drawing.OverlayType.POLYLINE,
@@ -59,11 +57,28 @@ export default class App extends React.Component {
         },
       });
       this.drawingManager.setMap(this.map);
+      this.autocomplete = new google.maps.places.Autocomplete(
+        this.autocompleteDivRef.current, {
+          types: ['geocode'],
+          componentRestrictions: {'country': ['USA']},
+          fields: ['formatted_address', 'geometry', 'name'],
+        }
+      );
+      this.autocomplete.addListener('place_changed', this.onPlaceChanged);
       google.maps.event.addListener(this.drawingManager, "overlaycomplete", (polygon) => {
         this.handlePolygonCalculations(polygon, true)
       });
     })
+  }
 
+  onPlaceChanged() {
+    const place = this.autocomplete.getPlace();
+    const coords = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    };
+    this.map.setCenter(coords);
+    this.setState({mapCenter: coords});
   }
 
   handlePolygonCalculations(polygon, showEditModal) {
@@ -145,21 +160,15 @@ export default class App extends React.Component {
     });
   }
 
-  handleLocationInputs(event) {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${event.target.value}&types=park&location=${this.state.mapCenter.lat}%2C${this.state.mapCenter.lng}&radius=500&key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg`
-    fetch(url).then(res => res.json()).then(data => console.log(data)).catch(err => console.error(err))
-  }
-
   render() {
     const currentLocationButton = (this.state.showingMap && !this.polygon) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
 
     const enterLocation = (this.state.showingMap && !this.polygon) &&
     <>
-      <form className='location'>
-        <label htmlFor="location">Enter a location</label>
-        <input type="text" onChange={this.handleLocationInputs}/>
-      </form>
       <p>or</p>
+      <div className='location'>
+        <input id='autocomplete' placeholder="search a location" type="text" ref={this.autocompleteDivRef}/>
+      </div>
     </>
 
     const openMapButton = (!this.state.showingMap) &&
@@ -175,8 +184,8 @@ export default class App extends React.Component {
         <h3>My Google Maps Demo</h3>
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
-        {enterLocation}
         {currentLocationButton}
+        {enterLocation}
         {saveButton}
         {<FinishedModal modal={this.state.showEditModal} handlePathCompleted={this.handlePathCompleted}/>}
       </div>

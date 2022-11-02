@@ -352,13 +352,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _googlemaps_js_api_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @googlemaps/js-api-loader */ "./node_modules/@googlemaps/js-api-loader/dist/index.esm.js");
 
 
-
-/* <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=drawing,places" defer></script>; */
-
 const loader = new _googlemaps_js_api_loader__WEBPACK_IMPORTED_MODULE_1__.Loader({
-  apiKey: "AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg",
+  apiKey: "AIzaSyBeNi6X_3E2J4ElWyexqXHqL2ASL1xC2k4",
   version: "weekly",
-  libraries: "drawing,places"
+  libraries: ["drawing", "places"]
 });
 class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
   constructor(props) {
@@ -379,16 +376,17 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     this.setCurrentLocation = this.setCurrentLocation.bind(this);
     this.handlePathCompleted = this.handlePathCompleted.bind(this);
     this.showMap = this.showMap.bind(this);
-    this.handleLocationInputs = this.handleLocationInputs.bind(this);
+    this.onPlaceChanged = this.onPlaceChanged.bind(this);
     this.mapDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
+    this.autocompleteDivRef = react__WEBPACK_IMPORTED_MODULE_0___default().createRef();
   }
   showMap(event) {
     loader.load().then(() => {
       this.map = new google.maps.Map(this.mapDivRef.current, {
         center: this.state.mapCenter,
         zoom: 18,
-        minZoom: 15,
-        maxZoom: 21
+        minZoom: 17,
+        maxZoom: 19
       });
       this.drawingManager = new google.maps.drawing.DrawingManager({
         drawingMode: google.maps.drawing.OverlayType.POLYLINE,
@@ -411,9 +409,28 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
         }
       });
       this.drawingManager.setMap(this.map);
+      this.autocomplete = new google.maps.places.Autocomplete(this.autocompleteDivRef.current, {
+        types: ['geocode'],
+        componentRestrictions: {
+          'country': ['USA']
+        },
+        fields: ['formatted_address', 'geometry', 'name']
+      });
+      this.autocomplete.addListener('place_changed', this.onPlaceChanged);
       google.maps.event.addListener(this.drawingManager, "overlaycomplete", polygon => {
         this.handlePolygonCalculations(polygon, true);
       });
+    });
+  }
+  onPlaceChanged() {
+    const place = this.autocomplete.getPlace();
+    const coords = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng()
+    };
+    this.map.setCenter(coords);
+    this.setState({
+      mapCenter: coords
     });
   }
   handlePolygonCalculations(polygon, showEditModal) {
@@ -489,22 +506,18 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
       });
     });
   }
-  handleLocationInputs(event) {
-    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${event.target.value}&types=park&location=${this.state.mapCenter.lat}%2C${this.state.mapCenter.lng}&radius=500&key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg`;
-    fetch(url).then(res => res.json()).then(data => console.log(data)).catch(err => console.error(err));
-  }
   render() {
     const currentLocationButton = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: this.setCurrentLocation
     }, "Set Current Location");
-    const enterLocation = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("form", {
+    const enterLocation = this.state.showingMap && !this.polygon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "or"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "location"
-    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("label", {
-      htmlFor: "location"
-    }, "Enter a location"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("input", {
+      id: "autocomplete",
+      placeholder: "search a location",
       type: "text",
-      onChange: this.handleLocationInputs
-    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "or"));
+      ref: this.autocompleteDivRef
+    })));
     const openMapButton = !this.state.showingMap && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: event => {
         this.handleShowMapClick(event);
@@ -522,7 +535,7 @@ class App extends (react__WEBPACK_IMPORTED_MODULE_0___default().Component) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("h3", null, "My Google Maps Demo"), openMapButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "map",
       ref: this.mapDivRef
-    }), enterLocation, currentLocationButton, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
+    }), currentLocationButton, enterLocation, saveButton, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(FinishedModal, {
       modal: this.state.showEditModal,
       handlePathCompleted: this.handlePathCompleted
     }));

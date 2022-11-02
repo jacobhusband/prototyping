@@ -77,9 +77,12 @@ p {
   flex-direction: column;
 }
 
-button {
+button,
+div.location input {
   font-weight: 500;
   border: 1px solid black;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0;
 }
 
 button:hover {
@@ -94,24 +97,13 @@ button.save:hover {
   background-color: rgb(218, 255, 255);
 }
 
-form.location label {
-  padding-right: 0.5rem;
-}
-
-form.location label,
-form.location input,
-form.location p,
+div.location input,
+div.location p,
 button {
   font-size: 0.9rem;
 }
 
-form.location input {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0;
-  border: 1px solid black;
-}
-
-form.location input:focus {
+div.location input:focus {
   outline: 1px solid blue;
 }
 
