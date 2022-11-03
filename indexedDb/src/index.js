@@ -32,7 +32,7 @@ set("latlng", latlng)
 
 function findPosition() {
   count++;
-  if (count === 5) {
+  if (count === 15) {
     clearInterval(id);
   }
   window.navigator.geolocation.getCurrentPosition((position) => {
@@ -50,3 +50,9 @@ function findPosition() {
     });
   });
 }
+
+window.addEventListener("offline", (event) => {
+  console.log("Just went offline");
+});
+
+console.log("Online?", window.navigator.onLine);

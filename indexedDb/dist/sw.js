@@ -12,7 +12,7 @@ const putInCache = async (request, response) => {
   await cache.put(request, response);
 };
 
-const cacheFirst = async ({ request, preloadResponsePromise, fallbackUrl }) => {
+const cacheFirst = async ({ request, fallbackUrl }) => {
   const responseFromCache = await caches.match(request);
   if (responseFromCache) {
     return responseFromCache;
