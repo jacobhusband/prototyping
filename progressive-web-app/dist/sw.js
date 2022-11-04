@@ -45,8 +45,9 @@ self.addEventListener("fetch", (event) => {
 self.addEventListener("push", (event) => {
   const payload = event.data?.text() ?? "no payload";
   event.waitUntil(
-    self.registration.showNotification("ServiceWorker Cookbook", {
+    self.registration.showNotification("Checking in to get coordinates.", {
       body: payload,
     })
   );
+  console.log("Sent a push event!");
 });
