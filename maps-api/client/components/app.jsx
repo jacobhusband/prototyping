@@ -1,5 +1,9 @@
 import React from 'react'
 import { Loader } from "@googlemaps/js-api-loader";
+import NoSleep from 'nosleep.js';
+import { set, get, update } from "idb-keyval";
+
+const noSleep = new NoSleep();
 
 const loader = new Loader({
   apiKey: "AIzaSyBeNi6X_3E2J4ElWyexqXHqL2ASL1xC2k4",
@@ -17,6 +21,7 @@ export default class App extends React.Component {
       distance: 0,
       pathCompleted: false,
       showEditModal: false,
+      intervalId: null,
       mapCenter: { lat: 33.634929, lng: -117.7405074 }
     }
     this.handleShowMapClick = this.handleShowMapClick.bind(this)
@@ -24,6 +29,8 @@ export default class App extends React.Component {
     this.handlePathCompleted = this.handlePathCompleted.bind(this)
     this.showMap = this.showMap.bind(this);
     this.onPlaceChanged = this.onPlaceChanged.bind(this);
+    this.triggerNoSleep = this.triggerNoSleep.bind(this);
+    this.findCoordinates = this.findCoordinates.bind(this);
     this.mapDivRef = React.createRef();
     this.autocompleteDivRef = React.createRef();
   }
@@ -71,6 +78,53 @@ export default class App extends React.Component {
     })
   }
 
+  registerServiceWorker () {
+    if ("serviceWorker" in window.navigator) {
+      try {
+        window.navigator.serviceWorker.register("../../server/public/sw.js").then((registration) => {
+          if (registration.installing) {
+            console.log("Service worker installing!");
+          } else if (registration.waiting) {
+            console.log("Service worker installed");
+          } else if (registration.active) {
+            console.log("Service worker active");
+          }
+        })
+        .catch(err => console.log(`Registration failed with ${err}`))
+      } catch (err) {
+        console.log(`Registration failed with ${err}`);
+      }
+    }
+  };
+
+  findCoordinates() {
+    const latlng = [];
+    set("latlng", latlng)
+    .then(() => {
+      this.setState({
+        intervalId: setInterval(this.findPosition, 3000),
+      });
+    })
+    .catch((err) => console.error(err));
+  }
+
+  findPosition() {
+    window.navigator.geolocation.getCurrentPosition((position) => {
+      const time = new Date().getTime() / 1000;
+      const newPos = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        time,
+      };
+      update("latlng", (arr) => {
+        const newArr = [...arr];
+        newArr.push(newPos);
+        console.log(newArr);
+        return newArr;
+      });
+    });
+  }
+
   onPlaceChanged() {
     const place = this.autocomplete.getPlace();
     const coords = {
@@ -101,6 +155,13 @@ export default class App extends React.Component {
         pathCompleted: true,
         showEditModal: showEditModal
       })
+  }
+
+  triggerNoSleep(event) {
+    document.addEventListener('click', function enableNoSleep() {
+      document.removeEventListener('click', enableNoSleep, false);
+      noSleep.enable();
+    }, false);
   }
 
   handlePathCompleted(event) {
@@ -160,6 +221,10 @@ export default class App extends React.Component {
     });
   }
 
+  componentDidMount() {
+    this.registerServiceWorker();
+  }
+
   render() {
     const currentLocationButton = (this.state.showingMap && !this.polygon) && <button onClick={this.setCurrentLocation}>Set Current Location</button>
 
@@ -182,6 +247,8 @@ export default class App extends React.Component {
     return(
       <div>
         <h3>My Google Maps Demo</h3>
+        <button onClick={this.triggerNoSleep}>Trigger No Sleep</button>
+        <button onClick={this.findCoordinates}>Trigger Find Coords</button>
         {openMapButton}
         <div className='map' ref={this.mapDivRef}/>
         {currentLocationButton}
