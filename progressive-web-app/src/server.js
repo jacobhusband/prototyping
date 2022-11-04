@@ -8,7 +8,7 @@ const webPush = require("web-push");
 app.use(express.static("dist"));
 app.use(express.json());
 
-webPush.setGCMAPIKey("AIzaSyBisC7-06Sen8svxcWhpjQAtrfv2bhKr-A");
+webPush.setGCMAPIKey(process.env.API);
 webPush.setVapidDetails("mailto:jakehusband2@gmail.com", process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
 
 app.get("/vapidPublicKey", (req, res) => {
