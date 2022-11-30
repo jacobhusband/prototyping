@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://kit.fontawesome.com/bcc0cc06ce.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Carousel</title>
+  </head>
+  <body>
+    <div class="carousel-container">
+      <img
+        src="https://www.livingspaces.com/globalassets/productassets/200000-299999/250000-259999/253000-253999/253100-253199/253180/253180_grey_fabric_reversible_sofa_chaise_signature_01.jpg?w=820&h=553&mode=pad"
+        data-id="1"
+      />
+      <img
+        src="https://www.livingspaces.com/globalassets/productassets/200000-299999/250000-259999/253000-253999/253100-253199/253180/253180_grey_fabric_reversible_sofa_chaise_side_02.jpg?w=820&h=553&mode=pad"
+        class="hidden"
+        data-id="2"
+      />
+      <img
+        src="https://www.livingspaces.com/globalassets/productassets/200000-299999/250000-259999/253000-253999/253100-253199/253180/253180_grey_fabric_reversible_sofa_chaise_side_18.jpg?w=820&h=553&mode=pad"
+        class="hidden"
+        data-id="3"
+      />
+      <div class="overlay">
+        <button class="left-chevron"><i class="fas fa-chevron-circle-left"></i></button>
+        <div class="dots">
+          <button class="dot" data-id="1">
+            <div class="dot filled" data-id="1"></div>
+          </button>
+          <button class="dot" data-id="2">
+            <div class="dot" data-id="2"></div>
+          </button>
+          <button class="dot" data-id="3">
+            <div class="dot" data-id="3"></div>
+          </button>
+        </div>
+        <button class="right-chevron"><i class="fas fa-chevron-circle-right"></i></button>
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
